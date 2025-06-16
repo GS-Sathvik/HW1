@@ -106,8 +106,8 @@ summary_stats %>%
 
 # Mid-parent height vs Child height plot
 ggplot(GaltonFamilies, aes(x = midparentHeight, y = childHeight)) +
-  geom_point(alpha = 0.5, color = "darkgreen") +
-  geom_smooth(method = "lm", se = FALSE, color = "steelblue", linetype = "dashed") +
+  geom_point(alpha = 0.5, color = "skyblue") +
+  geom_smooth(method = "lm", se = FALSE, color = "black", linetype = "dashed") +
   labs(
     title = "Heritability of Height: Mid-Parent vs Child",
     subtitle = "Data from Galton's study of families",
