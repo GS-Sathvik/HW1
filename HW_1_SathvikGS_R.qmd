@@ -1,0 +1,135 @@
+---
+title: "Adv Data Programming with R - HW 1"
+author: "Sathvik Srinath Gaurav - 24213364"
+format: 
+  pdf:
+    geometry:                  
+      - top = 0.5in
+      - bottom = 0.5in
+      - left = 0.5in
+      - right = 0.5in
+      - a4paper
+    include-in-header: 
+      text: |
+        \usepackage{xcolor}
+editor: visual
+execute: 
+  error: true                        
+  warning: false
+---
+
+# Introduction to Dataset
+
+- The **GaltonFamilies** dataset comes from a 19th-century heredity study by *Sir Francis Galton*.
+- It includes height data from \textcolor{red}{204 families of 934 individuals}, with father, mother, and multiple children in each.
+- Each child is identified by gender and birth order, and their height is recorded.
+- This dataset helps us explore how parent height influences child height.
+
+::: {.callout-note title="Galton’s Approach"}
+
+- Galton’s goal was to investigate how parental characteristics influence their offspring, particularly focusing on height as a measurable inherited trait.
+- Galton created a “mid-parent height” by adjusting and averaging the parent's heights to study inheritance patterns.\
+$midparentHeight = \frac{(father + 1.08 * mother)}{2.08}$
+:::
+
+```{r}
+#| label: load_packages
+#| echo: false
+
+# Load required package
+library(HistData)
+library(ggplot2)
+library(dplyr)
+library(kableExtra)
+```
+
+# Summary Statistics
+
+Using the **summary()** function on the GaltonFamilies dataset, it gives a overview of the key statistics, such as the *\textcolor{blue}{minimum, maximum, mean, and quartiles}* for each variable.
+
+```{r}
+#| label: load_data
+#| echo: false
+
+# Load the data
+data("GaltonFamilies")
+
+summary(GaltonFamilies)
+```
+
+- Most fathers are between 68–71 inches tall.
+- Most children are around 66–70 inches tall.
+- Almost equal numbers of male and female children.
+- On average, each family had about 6 children, with some families having up to 15.
+
+\
+Mid-parent height is calculated and summary statistics is provided, which includes the means and standard deviations of both child and parent heights.
+
+```{r}
+#| label: summarising
+#| echo: false
+#| warning: false
+#| message: false
+
+# Combined parent height variable (average of father and mother)
+GaltonFamilies <- GaltonFamilies %>%
+  mutate(midparentHeight = (father + 1.08 * mother) / 2.08)
+
+# Summary statistics
+summary_stats <- GaltonFamilies %>%
+  summarise(
+    mean_child = mean(childHeight),
+    mean_parent = mean(midparentHeight),
+    sd_child = sd(childHeight),
+    sd_parent = sd(midparentHeight)
+  )
+
+summary_stats %>%
+  rename(
+    `Mean child-height` = mean_child,
+    `Mean mid-parent height` = mean_parent,
+    `SD of child height` = sd_child,
+    `SD of mid-parent height` = sd_parent
+  ) %>%
+  kable(digits = 2, caption = "Summary Statistics of Parent and Child Heights")
+```
+
+- On average, the children in the dataset are about 66.75 inches tall.
+- The average mid-parent height (weighted average of father's and mother's height) is 66.54 inches, which is comparatively similar to average child height.
+- More variation in child height compared to parents.
+
+# Analysis - Mid-Parent vs Child Height
+
+- For exploring, we analyze the relationship between mid-parent height (a weighted average of the father's and mother's heights) and the child's height.
+- The mid-parent height places an important key as it accounts for differences in average height between men and women, making it a balanced estimate of expected genetic influence. By plotting child height against this mid-parent value, we can visually inspect the strength and direction of inheritance.
+
+```{r}
+#| label: plot
+#| echo: false
+#| warning: false
+#| message: false
+#| fig-cap: " Relationship between mid-parent height (weighted average of father and mother’s height) and child height, based on Galton’s 19th-century heredity study"
+#| fig-align: center
+
+# Mid-parent height vs Child height plot
+ggplot(GaltonFamilies, aes(x = midparentHeight, y = childHeight)) +
+  geom_point(alpha = 0.5, color = "darkgreen") +
+  geom_smooth(method = "lm", se = FALSE, color = "steelblue", linetype = "dashed") +
+  labs(
+    title = "Heritability of Height: Mid-Parent vs Child",
+    subtitle = "Data from Galton's study of families",
+    x = "Mid-Parent Height (inches)",
+    y = "Child Height (inches)"
+  ) +
+  theme_minimal(base_size = 13) +
+  theme(plot.title = element_text(face = "bold", size = 16),
+        plot.subtitle = element_text(size = 12))
+```
+
+- The positive slope of the trend line suggests a **direct correlation**, as mid-parent height increases, child height increases.
+- Some variability is observed around the line, indicating parental height is influential, other factors also affect child height.
+- The plot illustrates Galton’s insight, where parents with extremely tall or short height often have children whose heights are closer to the average.
+
+# Conclusion
+
+In summary, this plot illustrates that children’s heights generally relate to their parent's average height, reflecting genetic influence, while also highlighting the natural variation present in human growth.
